@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - 3MF</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				font-family: Monospace;
+				background-color: #000000;
+				margin: 0px;
+				overflow: hidden;
+			}
+
+			#info {
+				color: #fff;
+				position: absolute;
+				top: 10px;
+				width: 100%;
+				text-align: center;
+				z-index: 100;
+				display:block;
+
+			}
+
+			a { color: skyblue }
+			.button { background:#999; color:#eee; padding:0.2em 0.5em; cursor:pointer }
+			.highlight { background:orange; color:#fff; }
+
+			span {
+				display: inline-block;
+				width: 60px;
+				float: left;
+				text-align: center;
+			}
+
+		</style>
+	</head>
+	<body>
+		<div id="info">
+			<a href="http://threejs.org" target="_blank">three.js</a>
+			<a href="http://3mf.io" target="_blank">3MF File format</a>
+			<div>3MF loader test by <a href="https://github.com/technohippy" target="_blank">technohippy</a></div>
+			<div>Cube gears file from <a href="https://github.com/3MFConsortium/3mf-samples" target="_blank">3mf-samples</a></div>
+		</div>
+
+		<script src="js/three.js"></script>
+		<script src="js/loaders/3MFLoader.js"></script>
+
+		<script src="js/Detector.js"></script>
+		<script src="js/controls/OrbitControls.js"></script>
+
+		<script src="js/libs/jszip.min.js"></script>
+
+		<script src="js/loaders/OBJLoader.js"></script>
+
+		<script>
+
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+			var camera, scene, renderer;
+
+			init();
+
+			function init() {
+
+				scene = new THREE.Scene();
+				scene.add( new THREE.AmbientLight( 0x999999 ) );
+
+				var pointLight = new THREE.PointLight( 0xffffff, 0.6 );
+				pointLight.position.set( 80, -90, 150 );
+				scene.add( pointLight );
+
+				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 1000 );
+
+				// Z is up for objects intended to be 3D printed.
+
+				camera.up.set( 0, 0, 1 );
+				camera.position.set( -80, -90, 200 );
+
+				//camera.add( new THREE.PointLight( 0xffffff, 0.8 ) );
+
+				scene.add( camera );
+
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setClearColor( 0x333333 );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				document.body.appendChild( renderer.domElement );
+
+				// var loader = new THREE.ThreeMFLoader();
+				// loader.load( './models/3mf/cube_gears.3mf', function ( object ) {
+
+				// 	scene.add( object );
+				// 	render();
+
+				// } );
+
+var manager = new THREE.LoadingManager();
+				manager.onProgress = function ( item, loaded, total ) {
+
+					console.log( item, loaded, total );
+
+				};
+
+				var texture = new THREE.Texture();
+
+				var onProgress = function ( xhr ) {
+					if ( xhr.lengthComputable ) {
+						var percentComplete = xhr.loaded / xhr.total * 100;
+						console.log( Math.round(percentComplete, 100) + '% downloaded' );
+					}
+				};
+
+				var onError = function ( xhr ) {
+				};
+
+
+				var loader = new THREE.ImageLoader( manager );
+				loader.load( 'textures/hardwood2_diffuse.jpg', function ( image ) {
+
+					texture.image = image;
+					texture.needsUpdate = true;
+
+				} );
+
+				// model
+
+				var loader = new THREE.OBJLoader( manager );
+				loader.load( '1.obj', function ( object ) {
+
+					object.traverse( function ( child ) {
+
+						if ( child instanceof THREE.Mesh ) {
+
+							child.material.map = texture;
+
+						}
+
+					} );
+
+					object.position.y = 5;
+					
+					scene.add( object );
+
+				}, onProgress, onError );
+
+				var controls = new THREE.OrbitControls( camera, renderer.domElement );
+				controls.addEventListener( 'change', render );
+				controls.target.set( 1, 1, 1 );
+				controls.update();
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+				render();
+
+			}
+
+			function render() {
+		
+				renderer.render( scene, camera );
+
+			}
+
+		</script>
+	</body>
+</html>
