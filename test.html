@@ -7,38 +7,5 @@
 	</style>
 </head>
 <body>
-	<script src="js/three.min.js"></script>
-	<script src="js/AmbientLight.js"></script>
-	<script>
-		var scene = new THREE.Scene();
-		var aspect = window.innerWidth / window.innerHeight;
-		var camera = new THREE.PerspectiveCamera( 50, aspect, 1, 10000 );
-		var renderer = new THREE.WebGLRenderer();
-		renderer.setSize( window.innerWidth, window.innerHeight );
-		document.body.appendChild( renderer.domElement );
-
-		var ambient = new THREE.AmbientLight(0x666666);
-            scene.add(ambient);
-
-            var directionalLight = new THREE.DirectionalLight(0xffeedd);
-            directionalLight.position.set(0, 70, 100).normalize();
-            scene.add(directionalLight);
-
-		var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-		var material = new THREE.MeshNormalMaterial();
-		var cube = new THREE.Mesh( geometry, material );
-		scene.add( cube );
-		camera.position.z = 5;
-
-		var render = function () {
-			requestAnimationFrame( render );
-			cube.rotation.x += 0.01;
-			cube.rotation.y += 0.01;
-			renderer.render( scene, camera );
-		};
-
-		render();
-      // Javascript will go here.
-  </script>
 </body>
 </html>
